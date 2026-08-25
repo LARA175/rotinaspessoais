@@ -1,0 +1,10 @@
+{
+  "name": "api-rotinas-pessoais",
+  "version": "1.0.0",
+  "description": "API em Python (FastAPI + SQLAlchemy) para gerenciamento de rotinas",
+  "scripts": {
+    "start": "python main.py",
+    "dev": "python main.py",
+    "install-deps": "pip install -r requirements.txt"
+  }
+}
