@@ -1,18 +1,49 @@
-# Python
-api/.venv/
-api/__pycache__/
-api/**/__pycache__/
+# === ARQUIVOS DE AMBIENTE / CONFIGURAÇÕES SENSÍVEIS ===
+# Nunca commitar arquivos .env
+api/.env
+.env.local
+.env.production
+.env.development
+.env.staging
+
+# === BANCO DE DADOS SQLITE ===
+# Arquivos de banco local
 api/db/*.db
+api/db/*.sqlite
+api/db/*.sqlite3
 api/db/*.db-wal
 api/db/*.db-shm
 
-# Node
+# === DEPENDÊNCIAS E BUILDS ===
+# Python
+api/.venv/
+api/venv/
+api/__pycache__/
+api/**/__pycache__/
+api/*.pyc
+api/*.pyo
+
+# Node.js
+api/node_modules/
 frontend/node_modules/
 node_modules/
 
-# Build
+# Build outputs
 frontend/dist/
+frontend/build/
+api/dist/
+build/
 
-# Environment
-api/.env
-.env.local
+# === ARQUIVOS DO SISTEMA / IDEs ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# === LOG ===
+*.log
+server.log
+server.err
