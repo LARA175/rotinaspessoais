@@ -1,7 +1,7 @@
+// Componente raiz: layout com sidebar fixa + area de conteudo.
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import Header from './components/Header'
-import Footer from './components/Footer'
+import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import CalendarView from './components/CalendarView'
 import EventoForm from './components/EventoForm'
@@ -10,9 +10,9 @@ import AlarmManager from './components/AlarmManager'
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      <Header />
-      <main className="flex-1 pt-20">
+    <div className="app-layout">
+      <Sidebar />
+      <main className="app-content">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/calendario" element={<CalendarView />} />
@@ -22,7 +22,6 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>
-      <Footer />
       <AlarmManager />
     </div>
   )

@@ -5,7 +5,7 @@ Preciso que você faça uma varredura completa em todo o diretório do projeto (
 ### ⚠️ DIRETRIZ RIGOROSA DE SEGURANÇA (LEAK PREVENTION)
 - NÃO exiba, em hipótese alguma, chaves de API, segredos JWT, senhas de banco de dados, URIs de conexão com credenciais ou tokens reais.
 - Se você identificar qualquer credencial hardcoded nos arquivos de código durante a varredura, avise no início da resposta para que possamos movê-la para o arquivo `.env`.
-- No `README.md`, documente apenas as variáveis de ambiente necessárias utilizando exemplos genéricos (ex: `SECRET_KEY=sua_chave_secreta_aqui`).
+- No `README.md`, documente apenas as variáveis de ambiente necessárias utilizando exemplos genéricos (ex: `CHAVE_SECRETA=sua_chave_secreta_aqui`).
 
 ### 1. Etapa de Análise (Varredura do Sistema)
 Antes de escrever a documentação, analise a estrutura do projeto e verifique:

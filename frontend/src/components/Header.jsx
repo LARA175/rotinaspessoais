@@ -1,3 +1,4 @@
+// Cabeçalho fixo com a navegação principal e botão de nova tarefa.
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { FiHome, FiCalendar, FiPlus } from 'react-icons/fi'

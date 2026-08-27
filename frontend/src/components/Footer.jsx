@@ -1,3 +1,4 @@
+// Rodapé com informações do projeto acadêmico e instituição.
 import React from 'react'
 
 function Footer() {

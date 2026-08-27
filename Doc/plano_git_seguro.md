@@ -14,7 +14,7 @@ Preciso preparar e realizar o envio seguro do nosso projeto acadêmico do IFMT p
 ### Executar os Seguintes Passos de Segurança:
 
 #### 1. Varredura do Código Fonte (Secret Detection)
-- Varra todo o diretório do Backend e Frontend em busca de strings que pareçam credenciais hardcoded (chaves como `SECRET_KEY`, senhas de banco, tokens, URIs com usuário/senha).
+- Varra todo o diretório do Backend e Frontend em busca de strings que pareçam credenciais hardcoded (chaves como `CHAVE_SECRETA`, senhas de banco, tokens, URIs com usuário/senha).
 - Se encontrar alguma chave em código-fonte, remova-a imediatamente e coloque a leitura via variável de ambiente (`os.getenv` em Python ou `import.meta.env` em React).
 
 #### 2. Criação/Validação do Arquivo `.gitignore`

@@ -1,3 +1,4 @@
+"""Controladores (regras de negócio) para as entidades Categoria e Evento."""
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -5,6 +6,7 @@ from ..models.rotina_model import Categoria, Evento, sanitizar
 
 
 class CategoriaController:
+    """Operações de crud para categorias."""
     @staticmethod
     def criar(db: Session, dados: dict) -> Categoria:
         categoria = Categoria(
@@ -51,6 +53,7 @@ class CategoriaController:
 
 
 class EventoController:
+    """Operações de crud e consultas para eventos/rotinas."""
     @staticmethod
     def criar(db: Session, dados: dict) -> Evento:
         evento = Evento(

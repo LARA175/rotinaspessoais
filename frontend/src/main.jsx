@@ -1,3 +1,4 @@
+// Ponto de entrada do React: monta o app dentro do elemento #root com roteamento.
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'

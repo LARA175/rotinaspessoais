@@ -1,3 +1,4 @@
+"""Definição das rotas (endpoints) da API para categorias e eventos."""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -13,6 +14,7 @@ router = APIRouter()
 
 @router.on_event("startup")
 def criar_tabelas():
+    """Cria as tabelas e insere as categorias padrão ao iniciar a aplicação."""
     Base.metadata.create_all(bind=engine)
     db = next(obter_sessao())
     categorias_padrao = [
@@ -101,7 +103,8 @@ def criar_evento(dados: EventoCreate, db: Session = Depends(obter_sessao)):
 @router.get("/eventos/dia/{data}", response_model=list[dict])
 def listar_eventos_dia(data: str, db: Session = Depends(obter_sessao)):
     try:
-        data_dt = datetime.fromisoformat(data)
+        # Normaliza o sufixo 'Z' (UTC) aceito pelo front-end para o formato ISO do Python
+        data_dt = datetime.fromisoformat(data.replace("Z", "+00:00"))
     except ValueError:
         raise HTTPException(status_code=400, detail="Formato de data inválido")
     return EventoController.listar_por_dia(db, data_dt)

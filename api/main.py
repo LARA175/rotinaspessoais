@@ -1,3 +1,4 @@
+"""Ponto de entrada da aplicação: cria tabelas, categorias padrão e sobe o servidor."""
 import os
 import sys
 from pathlib import Path
@@ -12,10 +13,12 @@ from src.config.database import engine, Base
 from src.models.rotina_model import Categoria, Evento
 
 if __name__ == "__main__":
+    # Cria todas as tabelas definidas nos modelos (caso ainda não existam)
     Base.metadata.create_all(bind=engine)
 
     from src.config.database import SessionLocal
     db = SessionLocal()
+    # Categorias padrão inseridas na primeira execução
     categorias_padrao = [
         {"nome": "Estudantil", "cor": "#3b82f6", "icone": "graduation-cap"},
         {"nome": "Serviços Domésticos", "cor": "#ec4899", "icone": "home"},
@@ -28,6 +31,7 @@ if __name__ == "__main__":
     db.close()
 
     import uvicorn
-    porta = int(os.getenv("PORT", 3000))
+    # Lê a porta a partir da variável de ambiente PORTA
+    porta = int(os.getenv("PORTA", 3000))
     print(f"Servidor Python (FastAPI + Uvicorn) rodando na porta {porta}")
     uvicorn.run("src.app:app", host="0.0.0.0", port=porta, reload=True)

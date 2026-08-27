@@ -1,3 +1,4 @@
+"""Modelos de dados (SQLAlchemy): Categoria e Evento, com sanitização de texto."""
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
@@ -5,11 +6,13 @@ from ..config.database import Base
 import html
 
 def sanitizar(texto: str) -> str:
+    """Escapa caracteres HTML e remove espaços das pontas para evitar injeção."""
     if not texto:
         return ""
     return html.escape(str(texto).strip())
 
 class Categoria(Base):
+    """Representa uma categoria de rotinas (ex.: Estudantil, Trabalho)."""
     __tablename__ = "categorias"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -18,9 +21,11 @@ class Categoria(Base):
     icone = Column(String(50), default="calendar")
     data_criacao = Column(DateTime, default=datetime.now)
 
+    # Relacionamento com os eventos da categoria (exclusão em cascata)
     eventos = relationship("Evento", back_populates="categoria", cascade="all, delete-orphan")
 
 class Evento(Base):
+    """Representa um evento/rotina agendado dentro de uma categoria."""
     __tablename__ = "eventos"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -36,4 +41,5 @@ class Evento(Base):
     recorrencia = Column(String(20), default="unico")
     data_criacao = Column(DateTime, default=datetime.now)
 
+    # Relacionamento inverso com a categoria proprietária
     categoria = relationship("Categoria", back_populates="eventos")

@@ -1,3 +1,4 @@
+// Toast de alarmes e lembretes — notificacoes premium.
 import React, { useState, useEffect, useRef } from 'react'
 import { eventoService, categoriaService } from '../services/api'
 import { FiBell, FiVolume2, FiCalendar, FiX, FiClock } from 'react-icons/fi'
@@ -6,146 +7,81 @@ import { ptBR } from 'date-fns/locale/pt-BR'
 
 function AlarmManager() {
   const [eventosProximos, setEventosProximos] = useState([])
-  const [notificacaoAtual, setNotificacaoAtual] = useState(null)
+  const [notificacao, setNotificacao] = useState(null)
   const audioRef = useRef(null)
   const timeoutRef = useRef(null)
 
   useEffect(() => {
-    const buscarEventos = async () => {
+    const buscar = async () => {
       try {
         const agora = new Date()
-        const inicio = agora.toISOString()
-        const fim = new Date(agora.getTime() + 24 * 60 * 60 * 1000).toISOString()
-
-        const [eventosRes, categoriasRes] = await Promise.all([
-          eventoService.listar({ data_inicio: inicio, data_fim: fim }),
+        const [evRes, catRes] = await Promise.all([
+          eventoService.listar({ data_inicio: agora.toISOString(), data_fim: new Date(agora.getTime() + 86400000).toISOString() }),
           categoriaService.listar()
         ])
-
-        const eventos = eventosRes.data || eventosRes.data?.dados || []
-        const categorias = categoriasRes.data || categoriasRes.data?.dados || []
-
-        const categoriaMap = {}
-        categorias.forEach((cat) => {
-          categoriaMap[cat.id] = cat
-        })
-
-        const eventosComCategoria = eventos.map((evento) => ({
-          ...evento,
-          categoria_nome: categoriaMap[evento.categoria_id]?.nome,
-          categoria_cor: categoriaMap[evento.categoria_id]?.cor,
-        }))
-
-        setEventosProximos(eventosComCategoria)
-      } catch (err) {
-        console.error('Erro ao buscar eventos para alarmes:', err)
-      }
+        const evs = evRes.data || evRes.data?.dados || []
+        const cats = catRes.data || catRes.data?.dados || []
+        const map = {}
+        cats.forEach((c) => { map[c.id] = c })
+        setEventosProximos(evs.map((e) => ({
+          ...e,
+          categoria_nome: map[e.categoria_id]?.nome,
+          categoria_cor: map[e.categoria_id]?.cor,
+        })))
+      } catch (err) { console.error('Erro ao buscar alarmes:', err) }
     }
-
-    buscarEventos()
-    const intervalo = setInterval(buscarEventos, 60000)
-    return () => clearInterval(intervalo)
+    buscar()
+    const i = setInterval(buscar, 60000)
+    return () => clearInterval(i)
   }, [])
 
   useEffect(() => {
-    const verificarAlarmes = () => {
+    const verificar = () => {
       const agora = new Date()
-
-      eventosProximos.forEach((evento) => {
-        const dataEvento = new Date(evento.data_inicio)
-        const diffMinutos = Math.floor((dataEvento - agora) / (1000 * 60))
-
-        if (diffMinutos === 0 && !evento._alarmado) {
-          evento._alarmado = true
-          dispararAlarme(evento)
-        } else if (diffMinutos === evento.lembrete_minutos && !evento._lembrado) {
-          evento._lembrado = true
-          dispararLembrete(evento)
-        }
+      eventosProximos.forEach((ev) => {
+        const diff = Math.floor((new Date(ev.data_inicio) - agora) / 60000)
+        if (diff === 0 && !ev._alarmado) { ev._alarmado = true; dispararAlarme(ev) }
+        else if (diff === ev.lembrete_minutos && !ev._lembrado) { ev._lembrado = true; dispararLembrete(ev) }
       })
     }
-
-    const intervalo = setInterval(verificarAlarmes, 1000)
-    return () => clearInterval(intervalo)
+    const i = setInterval(verificar, 1000)
+    return () => clearInterval(i)
   }, [eventosProximos])
 
-  const dispararAlarme = (evento) => {
-    setNotificacaoAtual({
-      tipo: 'alarme',
-      titulo: evento.titulo,
-      evento,
-      timestamp: Date.now(),
-    })
-
-    if (audioRef.current) {
-      audioRef.current.play().catch((err) => console.log('Autoplay bloqueado:', err))
-    }
-
+  const dispararAlarme = (ev) => {
+    setNotificacao({ tipo: 'alarme', titulo: ev.titulo, ev, ts: Date.now() })
+    if (audioRef.current) audioRef.current.play().catch(() => {})
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('Alarme de Rotina', {
-        body: `${evento.titulo} - Hora de executar!`,
-        icon: '/favicon.ico',
-      })
+      new Notification('Alarme de Rotina', { body: `${ev.titulo} — Hora de executar!` })
     }
-
     timeoutRef.current = setTimeout(() => {
-      setNotificacaoAtual(null)
-      if (audioRef.current) {
-        audioRef.current.pause()
-      }
+      setNotificacao(null)
+      if (audioRef.current) audioRef.current.pause()
     }, 60000)
   }
 
-  const dispararLembrete = (evento) => {
-    setNotificacaoAtual({
-      tipo: 'lembrete',
-      titulo: evento.titulo,
-      evento,
-      timestamp: Date.now(),
-      mensagem: `${evento.lembrete_minutos} minuto(s) antes`,
-    })
-
+  const dispararLembrete = (ev) => {
+    setNotificacao({ tipo: 'lembrete', titulo: ev.titulo, ev, ts: Date.now(),
+      mensagem: `${ev.lembrete_minutos} minuto(s) antes` })
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('Lembrete de Rotina', {
-        body: `${evento.titulo} em ${evento.lembrete_minutos} minutos`,
-        icon: '/favicon.ico',
-      })
+      new Notification('Lembrete de Rotina', { body: `${ev.titulo} em ${ev.lembrete_minutos} min` })
     }
   }
 
-  const fecharNotificacao = () => {
-    setNotificacaoAtual(null)
-    if (audioRef.current) {
-      audioRef.current.pause()
-    }
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-  }
-
-  const solicitarPermissaoNotificacao = () => {
-    if ('Notification' in window) {
-      Notification.requestPermission()
-    }
+  const fechar = () => {
+    setNotificacao(null)
+    if (audioRef.current) audioRef.current.pause()
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
   }
 
   useEffect(() => {
-    solicitarPermissaoNotificacao()
+    if ('Notification' in window) Notification.requestPermission()
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }
   }, [])
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [])
-
-  const eventosHoje = eventosProximos.filter((evento) => {
-    const dataEvento = new Date(evento.data_inicio)
-    const hoje = new Date()
-    return dataEvento.toDateString() === hoje.toDateString()
-  })
+  const eventosHoje = eventosProximos.filter((ev) =>
+    new Date(ev.data_inicio).toDateString() === new Date().toDateString()
+  )
 
   return (
     <>
@@ -154,65 +90,65 @@ function AlarmManager() {
         <source src="/sounds/alarme.wav" type="audio/wav" />
       </audio>
 
-      {notificacaoAtual && (
-        <div className="fixed bottom-4 right-4 z-50 max-w-sm w-full">
-          <div
-            className={`p-4 rounded-xl shadow-lg border text-slate-900 ${
-              notificacaoAtual.tipo === 'alarme'
-                ? 'bg-cyan-400 border-cyan-300'
-                : 'bg-amber-400 border-amber-300'
-            }`}
-          >
+      {/* Toast de notificacao */}
+      {notificacao && (
+        <div className="toast">
+          <div className="glass-strong p-4" style={{
+            borderLeft: `3px solid ${notificacao.tipo === 'alarme' ? '#06b6d4' : '#f59e0b'}`,
+          }}>
             <div className="flex items-start gap-3">
-              <FiBell className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <div className="font-bold">
-                  {notificacaoAtual.tipo === 'alarme' ? 'ALARME' : 'LEMBRETE'}
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: notificacao.tipo === 'alarme' ? 'rgba(6,182,212,0.15)' : 'rgba(245,158,11,0.15)' }}>
+                <FiBell className="w-4 h-4"
+                  style={{ color: notificacao.tipo === 'alarme' ? '#06b6d4' : '#f59e0b' }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[11px] font-semibold uppercase tracking-wider mb-0.5"
+                  style={{ color: notificacao.tipo === 'alarme' ? '#06b6d4' : '#f59e0b' }}>
+                  {notificacao.tipo === 'alarme' ? 'Alarme' : 'Lembrete'}
                 </div>
-                <div className="text-sm mt-1">{notificacaoAtual.titulo}</div>
-                {notificacaoAtual.mensagem && (
-                  <div className="text-xs opacity-80 mt-1">
-                    {notificacaoAtual.mensagem}
+                <div className="text-[14px] font-medium truncate" style={{ color: '#f1f5f9' }}>
+                  {notificacao.titulo}
+                </div>
+                {notificacao.mensagem && (
+                  <div className="text-[12px] mt-0.5" style={{ color: '#94a3b8' }}>
+                    {notificacao.mensagem}
                   </div>
                 )}
-                <div className="text-xs opacity-70 mt-1 flex items-center gap-1">
+                <div className="flex items-center gap-1 mt-1 text-[12px]" style={{ color: '#64748b' }}>
                   <FiClock className="w-3 h-3" />
-                  {format(new Date(notificacaoAtual.evento.data_inicio), "HH:mm", { locale: ptBR })}
+                  {format(new Date(notificacao.ev.data_inicio), 'HH:mm', { locale: ptBR })}
                 </div>
               </div>
-              <button
-                onClick={fecharNotificacao}
-                className="p-1 hover:bg-black/10 rounded"
-              >
-                <FiX className="w-4 h-4" />
+              <button onClick={fechar} className="btn-icon" style={{ width: '28px', height: '28px' }}>
+                <FiX className="w-3.5 h-3.5" />
               </button>
             </div>
-            {notificacaoAtual.tipo === 'alarme' && (
-              <div className="mt-2 text-center">
-                <FiVolume2 className="w-4 h-4 inline animate-pulse" />
-                <span className="text-xs ml-1">Som ativo</span>
+            {notificacao.tipo === 'alarme' && (
+              <div className="flex items-center gap-1.5 mt-3 pt-3"
+                style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <FiVolume2 className="w-3.5 h-3.5 animate-pulse" style={{ color: '#06b6d4' }} />
+                <span className="text-[11px] font-medium" style={{ color: '#06b6d4' }}>Som ativo</span>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {eventosHoje.length > 0 && (
-        <div className="fixed bottom-4 left-4 z-40 max-w-xs w-full opacity-80">
-          {eventosHoje.slice(0, 3).map((evento) => (
-            <div
-              key={evento.id}
-              className="glass-card rounded-lg p-3 mb-2 border border-slate-700"
-            >
-              <div className="flex items-center gap-2">
-                <FiCalendar className="w-4 h-4 text-slate-400" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-slate-200">{evento.titulo}</div>
-                  <div className="text-xs text-slate-400">
-                    {format(new Date(evento.data_inicio), "HH:mm", { locale: ptBR })}
-                    {' - '}
-                    {evento.categoria_nome}
-                  </div>
+      {/* Eventos de hoje — mini floating */}
+      {eventosHoje.length > 0 && !notificacao && (
+        <div className="fixed bottom-20 sm:bottom-6 left-4 right-4 sm:left-[276px] sm:right-auto z-40 max-w-[280px] space-y-2"
+          style={{ opacity: 0.7 }}>
+          {eventosHoje.slice(0, 2).map((ev) => (
+            <div key={ev.id} className="glass-subtle flex items-center gap-2.5 p-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: `${ev.categoria_cor || '#6366f1'}15` }}>
+                <FiCalendar className="w-3.5 h-3.5" style={{ color: ev.categoria_cor || '#6366f1' }} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[12px] font-medium truncate">{ev.titulo}</div>
+                <div className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  {format(new Date(ev.data_inicio), 'HH:mm')} — {ev.categoria_nome}
                 </div>
               </div>
             </div>

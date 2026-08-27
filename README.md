@@ -38,7 +38,7 @@ A aplicação oferece uma interface semelhante ao Google Calendar, com visualiza
 
 | Funcionalidade | Endpoint | Descrição |
 |---|---|---|
-| Health Check | `GET /api/health` | Verifica status da API |
+| Verificação de Saúde | `GET /api/saude` | Verifica status da API |
 | Listar Categorias | `GET /api/categorias` | Retorna todas as categorias |
 | Criar Categoria | `POST /api/categorias` | Cria uma nova categoria |
 | Buscar Categoria | `GET /api/categorias/{id}` | Busca categoria por ID |
@@ -210,7 +210,7 @@ source .venv/bin/activate
 python main.py
 ```
 
-A API estará disponível em `http://localhost:3000`
+A API estará disponível em `http://localhost:5173`
 
 ### 4. Configurar Frontend (React)
 
@@ -218,7 +218,7 @@ A API estará disponível em `http://localhost:3000`
 cd frontend
 npm install
 
-# Configurar proxy (já configurado em vite.config.js para localhost:3000)
+# Configurar proxy (já configurado em vite.config.js para localhost:5173)
 ```
 
 ### 5. Executar Frontend
@@ -242,18 +242,18 @@ O projeto utiliza um arquivo `.env` para armazenar todas as variáveis de ambien
 
 | Variável | Descrição | Exemplo |
 |---|---|---|
-| `PORT` | Porta do servidor backend | `3000` |
+| `PORTA` | Porta do servidor backend | `3000` |
 | `ORIGEM_PERMITIDA` | Origem CORS permitida | `http://localhost:5173` |
-| `DB_PATH` | Caminho do banco SQLite | `db/rotinas.db` |
-| `ALGORITHM` | Algoritmo JWT | `HS256` |
-| `SECRET_KEY` | Chave secreta para tokens | Use `python -c "from secrets import token_hex; print(token_hex(32))"` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Expiração do token (min) | `60` |
-| `DB_ENCRYPTION_KEY` | Chave de criptografia do DB | Use `python -c "from secrets import token_hex; print(token_hex(32))"` |
+| `CAMINHO_BANCO` | Caminho do banco SQLite | `db/rotinas.db` |
+| `ALGORITMO` | Algoritmo JWT | `HS256` |
+| `CHAVE_SECRETA` | Chave secreta para tokens | Use `python -c "from secrets import token_hex; print(token_hex(32))"` |
+| `MINUTOS_EXPIRACAO_TOKEN` | Expiração do token (min) | `60` |
+| `CHAVE_CIFRAGEM_BANCO` | Chave de criptografia do DB | Use `python -c "from secrets import token_hex; print(token_hex(32))"` |
 
 ### Geração de Chaves Seguras
 
 ```bash
-# Para SECRET_KEY e DB_ENCRYPTION_KEY
+# Para CHAVE_SECRETA e CHAVE_CIFRAGEM_BANCO
 python -c "from secrets import token_hex; print(token_hex(32))"
 ```
 
@@ -304,13 +304,13 @@ frontend/dist/
 
 ```bash
 # Health Check
-curl http://localhost:3000/api/health
+curl http://localhost:5173/api/saude
 
 # Listar categorias
-curl http://localhost:3000/api/categorias
+curl http://localhost:5173/api/categorias
 
 # Criar evento
-curl -X POST http://localhost:3000/api/eventos \
+curl -X POST http://localhost:5173/api/eventos \
   -H "Content-Type: application/json" \
   -d '{
     "titulo": "Aula de Desenvolvimento Web",
@@ -323,7 +323,7 @@ curl -X POST http://localhost:3000/api/eventos \
   }'
 
 # Eventos de um dia específico
-curl "http://localhost:3000/api/eventos/dia/2026-08-25"
+curl "http://localhost:5173/api/eventos/dia/2026-08-25"
 ```
 
 ---

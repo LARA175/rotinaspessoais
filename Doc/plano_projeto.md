@@ -23,7 +23,7 @@
 - **Routing:** React Router DOM
 
 ## Endpoints da API
-- `GET /api/health` - Health check
+- `GET /api/saude` - Verificação de saúde
 - `GET/POST /api/categorias` - CRUD categorias
 - `GET/POST /api/eventos` - CRUD eventos
 - `GET /api/eventos/dia/{data}` - Eventos por dia
