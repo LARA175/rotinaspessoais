@@ -94,28 +94,28 @@ function AlarmManager() {
       {notificacao && (
         <div className="toast">
           <div className="glass-strong p-4" style={{
-            borderLeft: `3px solid ${notificacao.tipo === 'alarme' ? '#06b6d4' : '#f59e0b'}`,
+            borderLeft: `4px solid ${notificacao.tipo === 'alarme' ? '#5f7f52' : '#b08945'}`,
           }}>
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: notificacao.tipo === 'alarme' ? 'rgba(6,182,212,0.15)' : 'rgba(245,158,11,0.15)' }}>
+                style={{ background: notificacao.tipo === 'alarme' ? 'rgba(95,127,82,0.15)' : 'rgba(176,137,69,0.15)' }}>
                 <FiBell className="w-4 h-4"
-                  style={{ color: notificacao.tipo === 'alarme' ? '#06b6d4' : '#f59e0b' }} />
+                  style={{ color: notificacao.tipo === 'alarme' ? '#47633c' : '#b08945' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[11px] font-semibold uppercase tracking-wider mb-0.5"
-                  style={{ color: notificacao.tipo === 'alarme' ? '#06b6d4' : '#f59e0b' }}>
+                  style={{ color: notificacao.tipo === 'alarme' ? '#47633c' : '#b08945' }}>
                   {notificacao.tipo === 'alarme' ? 'Alarme' : 'Lembrete'}
                 </div>
-                <div className="text-[14px] font-medium truncate" style={{ color: '#f1f5f9' }}>
+                <div className="text-[14px] font-medium truncate" style={{ color: '#3f4a37' }}>
                   {notificacao.titulo}
                 </div>
                 {notificacao.mensagem && (
-                  <div className="text-[12px] mt-0.5" style={{ color: '#94a3b8' }}>
+                  <div className="text-[12px] mt-0.5" style={{ color: '#5d6a52' }}>
                     {notificacao.mensagem}
                   </div>
                 )}
-                <div className="flex items-center gap-1 mt-1 text-[12px]" style={{ color: '#64748b' }}>
+                <div className="flex items-center gap-1 mt-1 text-[12px]" style={{ color: '#8b957e' }}>
                   <FiClock className="w-3 h-3" />
                   {format(new Date(notificacao.ev.data_inicio), 'HH:mm', { locale: ptBR })}
                 </div>
@@ -126,9 +126,9 @@ function AlarmManager() {
             </div>
             {notificacao.tipo === 'alarme' && (
               <div className="flex items-center gap-1.5 mt-3 pt-3"
-                style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <FiVolume2 className="w-3.5 h-3.5 animate-pulse" style={{ color: '#06b6d4' }} />
-                <span className="text-[11px] font-medium" style={{ color: '#06b6d4' }}>Som ativo</span>
+                style={{ borderTop: '1.5px solid rgba(95,127,82,0.25)' }}>
+                <FiVolume2 className="w-3.5 h-3.5 animate-pulse" style={{ color: '#47633c' }} />
+                <span className="text-[11px] font-medium" style={{ color: '#47633c' }}>Som ativo</span>
               </div>
             )}
           </div>
@@ -142,8 +142,8 @@ function AlarmManager() {
           {eventosHoje.slice(0, 2).map((ev) => (
             <div key={ev.id} className="glass-subtle flex items-center gap-2.5 p-3">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: `${ev.categoria_cor || '#6366f1'}15` }}>
-                <FiCalendar className="w-3.5 h-3.5" style={{ color: ev.categoria_cor || '#6366f1' }} />
+                style={{ background: `${ev.categoria_cor || '#5f7f52'}26` }}>
+                <FiCalendar className="w-3.5 h-3.5" style={{ color: ev.categoria_cor || '#5f7f52' }} />
               </div>
               <div className="min-w-0">
                 <div className="text-[12px] font-medium truncate">{ev.titulo}</div>

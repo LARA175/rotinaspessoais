@@ -3,9 +3,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        estudantil: "#3b82f6",
-        domestico: "#ec4899",
-        trabalho: "#10b981",
+        estudantil: "#5f7f52",
+        domestico: "#b08945",
+        trabalho: "#7a9e7e",
       },
     },
   },

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { eventoService, categoriaService } from '../services/api'
 import { FiCalendar, FiClock, FiChevronLeft, FiChevronRight, FiPlus } from 'react-icons/fi'
+import CategoriaIcone from './CategoriaIcone'
 import { format, startOfWeek, addWeeks, startOfMonth, addMonths, addDays, isSameDay, isSameMonth, isToday, getDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import { Link } from 'react-router-dom'
@@ -89,35 +90,35 @@ function CalendarView() {
       {/* Controles */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5 sm:mb-6 animate-fade-up delay-1">
         {/* Navegação de data */}
-        <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
-          <button onClick={() => navegar(-1)} className="btn-icon w-9 h-9 sm:w-10 sm:h-10">
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <button onClick={() => navegar(-1)} className="btn-icon w-9 h-9 sm:w-10 sm:h-10 shrink-0">
             <FiChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
-          <h2 className="text-[14px] sm:text-[16px] font-semibold min-w-0 text-center px-1 truncate max-w-[220px] sm:max-w-none">
+          <h2 className="flex-1 min-w-0 text-center truncate px-1">
             {tituloVisao()}
           </h2>
-          <button onClick={() => navegar(1)} className="btn-icon w-9 h-9 sm:w-10 sm:h-10">
+          <button onClick={() => navegar(1)} className="btn-icon w-9 h-9 sm:w-10 sm:h-10 shrink-0">
             <FiChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <button
             onClick={() => setDataAtual(new Date())}
-            className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] font-medium"
-            style={{ color: 'var(--accent-1)', background: 'rgba(102,126,234,0.1)' }}
+            className="shrink-0 px-3 py-1.5 rounded-full text-[13px] font-bold"
+            style={{ color: 'var(--sage-dark)', background: 'var(--matcha)' }}
           >
             Hoje
           </button>
         </div>
 
         {/* Toggle de visão */}
-        <div className="flex gap-1 p-1 rounded-xl self-center sm:self-auto" style={{ background: 'rgba(255,255,255,0.04)' }}>
+        <div className="flex gap-1 p-1 rounded-full self-stretch sm:self-auto" style={{ background: 'rgba(95,127,82,0.08)' }}>
           {['dia', 'semana', 'mes'].map((v) => (
             <button
               key={v}
               onClick={() => setVisao(v)}
-              className="px-3 py-1.5 sm:px-4 rounded-lg text-[12px] sm:text-[13px] font-medium transition-all"
+              className="flex-1 sm:flex-none px-3 py-1.5 sm:px-4 rounded-full text-[13px] font-bold transition-all"
               style={{
-                background: visao === v ? 'linear-gradient(135deg, var(--accent-1), var(--accent-2))' : 'transparent',
-                color: visao === v ? '#fff' : 'var(--text-secondary)',
+                background: visao === v ? 'var(--sage)' : 'transparent',
+                color: visao === v ? '#fffdf4' : 'var(--text-secondary)',
               }}
             >
               {v === 'mes' ? 'Mês' : v.charAt(0).toUpperCase() + v.slice(1)}
@@ -167,13 +168,13 @@ function CalendarView() {
         {carregando ? (
           <div className="space-y-2 sm:space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 sm:h-20 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+              <div key={i} className="h-16 sm:h-20 rounded-xl animate-pulse" style={{ background: 'rgba(95,127,82,0.1)' }} />
             ))}
           </div>
         ) : eventos.length === 0 ? (
           <div className="glass-card text-center py-12 sm:py-16">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4"
-              style={{ background: 'rgba(102,126,234,0.1)' }}>
+              style={{ background: 'rgba(95,127,82,0.12)' }}>
               <FiCalendar className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: 'var(--accent-1)', opacity: 0.5 }} />
             </div>
             <p className="text-[14px] sm:text-[15px] mb-1">Nenhum evento neste período</p>
@@ -192,11 +193,11 @@ function CalendarView() {
               return (
                 <div
                   key={i}
-                  className="min-h-[52px] sm:min-h-[80px] p-1 sm:p-1.5 rounded-lg sm:rounded-xl transition-all"
+                  className="min-h-[52px] sm:min-h-[80px] p-1 sm:p-1.5 rounded-lg sm:rounded-xl transition-all overflow-hidden"
                   style={{
-                    background: hoje ? 'rgba(102,126,234,0.08)' : 'rgba(255,255,255,0.02)',
-                    border: hoje ? '1px solid rgba(102,126,234,0.2)' : '1px solid rgba(255,255,255,0.03)',
-                    opacity: mesAtual ? 1 : 0.3,
+                    background: hoje ? 'rgba(95,127,82,0.12)' : 'rgba(95,127,82,0.04)',
+                    border: hoje ? '2px solid var(--sage)' : '1.5px solid #dfe4cd',
+                    opacity: mesAtual ? 1 : 0.35,
                   }}
                 >
                   <div className="text-[10px] sm:text-[12px] font-medium mb-0.5 sm:mb-1"
@@ -208,7 +209,7 @@ function CalendarView() {
                       const c = catMap[ev.categoria_id]
                       return (
                         <div key={ev.id} className="text-[8px] sm:text-[10px] truncate rounded px-0.5 sm:px-1 py-px font-medium"
-                          style={{ background: `${c?.cor || '#6366f1'}18`, color: c?.cor || '#6366f1' }}>
+                          style={{ background: `${c?.cor || '#5f7f52'}26`, color: c?.cor || '#5f7f52' }}>
                           {ev.titulo}
                         </div>
                       )
@@ -230,8 +231,8 @@ function CalendarView() {
                 <div key={evento.id} className="glass-card p-3 sm:p-4">
                   <div className="flex items-start gap-3 sm:gap-4">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ background: `${cat?.cor || '#6366f1'}12` }}>
-                      <span className="text-[12px] sm:text-[13px] font-bold" style={{ color: cat?.cor || '#6366f1' }}>
+                      style={{ background: `${cat?.cor || '#5f7f52'}26` }}>
+                      <span className="text-[12px] sm:text-[13px] font-bold" style={{ color: cat?.cor || '#5f7f52' }}>
                         {format(new Date(evento.data_inicio), 'HH:mm')}
                       </span>
                     </div>
@@ -248,6 +249,7 @@ function CalendarView() {
                         </span>
                         {cat && (
                           <span className="cat-badge" style={{ background: `${cat.cor}15`, color: cat.cor }}>
+                            <CategoriaIcone icone={cat.icone} cor={cat.cor} tamanho={12} />
                             {cat.nome}
                           </span>
                         )}

@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { FiHome, FiCalendar, FiPlus, FiTag, FiClock } from 'react-icons/fi'
 
 const itensNav = [
-  { path: '/dashboard', label: 'Dashboard', icon: FiHome },
+  { path: '/dashboard', label: 'Início', icon: FiHome },
   { path: '/calendario', label: 'Calendário', icon: FiCalendar },
   { path: '/eventos/novo', label: 'Tarefa', icon: FiPlus },
   { path: '/categorias', label: 'Categorias', icon: FiTag },

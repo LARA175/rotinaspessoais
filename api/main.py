@@ -20,9 +20,9 @@ if __name__ == "__main__":
     db = SessionLocal()
     # Categorias padrão inseridas na primeira execução
     categorias_padrao = [
-        {"nome": "Estudantil", "cor": "#3b82f6", "icone": "graduation-cap"},
-        {"nome": "Serviços Domésticos", "cor": "#ec4899", "icone": "home"},
-        {"nome": "Trabalho", "cor": "#10b981", "icone": "briefcase"},
+        {"nome": "Estudos", "cor": "#5f7f52", "icone": "livro"},
+        {"nome": "Serviços Domésticos", "cor": "#b08945", "icone": "casa"},
+        {"nome": "Trabalho", "cor": "#47633c", "icone": "maleta"},
     ]
     for cat in categorias_padrao:
         if not db.query(Categoria).filter(Categoria.nome == cat["nome"]).first():

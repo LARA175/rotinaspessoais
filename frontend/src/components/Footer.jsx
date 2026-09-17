@@ -3,9 +3,9 @@ import React from 'react'
 
 function Footer() {
   return (
-    <footer className="bg-slate-900/80 backdrop-blur border-t border-slate-700 mt-auto">
+    <footer className="mt-auto" style={{ background: '#f5efdd', borderTop: '2px solid #d5dcc0' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="text-center text-sm text-slate-400">
+        <div className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
           <p>
             <strong>Rotinas Pessoais</strong> - Projeto Acadêmico
           </p>

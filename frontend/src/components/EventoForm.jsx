@@ -1,11 +1,3 @@
-// Formulário de criação/edição de eventos.
-import React, { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { eventoService, categoriaService } from '../services/api'
-import { FiSave, FiX, FiTag, FiCalendar, FiUsers, FiBell } from 'react-icons/fi'
-import { useNavigate, useParams } from 'react-router-dom'
-import { format } from 'date-fns'
-
 function EventoForm({ editar = false }) {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -13,9 +5,14 @@ function EventoForm({ editar = false }) {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState(null)
 
+  // Lista fixa de horas 24h (00 a 23) e minutos (00 a 59) — sem AM/PM, sempre Brasil
+  const HORAS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+  const MINUTOS = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
+
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
-      titulo: '', descricao: '', categoria_id: '', data_inicio: '', data_fim: '',
+      titulo: '', descricao: '', categoria_id: '', data_dia: '',
+      hini_h: '', hini_m: '', hfim_h: '', hfim_m: '',
       convidados: '', lembrete_minutos: 0, recorrencia: 'unico',
     },
   })
@@ -40,28 +37,52 @@ function EventoForm({ editar = false }) {
           setValue('titulo', ev.titulo)
           setValue('descricao', ev.descricao || '')
           setValue('categoria_id', ev.categoria_id)
-          setValue('data_inicio', format(new Date(ev.data_inicio), "yyyy-MM-dd'T'HH:mm"))
-          setValue('data_fim', ev.data_fim ? format(new Date(ev.data_fim), "yyyy-MM-dd'T'HH:mm") : '')
-          setValue('convidados', ev.convidados || '')
-          setValue('lembrete_minutos', ev.lembrete_minutos || 0)
-          setValue('recorrencia', ev.recorrencia || 'unico')
+          // Separa data e hora 24h (sem AM/PM) nos selects
+          setValue('data_dia', format(new Date(ev.data_inicio), 'yyyy-MM-dd'))
+          const [hiH, hiM] = format(new Date(ev.data_inicio), 'HH:mm').split(':')
+          setValue('hini_h', hiH)
+          setValue('hini_m', hiM)
+          if (ev.data_fim) {
+            const [hfH, hfM] = format(new Date(ev.data_fim), 'HH:mm').split(':')
+            setValue('hfim_h', hfH)
+            setValue('hfim_m', hfM)
+          } else {
+            setValue('hfim_h', '')
+            setValue('hfim_m', '')
+          }
         } catch { setErro('Erro ao carregar evento.') }
       }
       carregarEvento()
     }
-  }, [editar, id, setValue])
+  }, [editar, id])
 
   const onSubmit = async (dados) => {
     setCarregando(true)
     setErro(null)
     try {
-      if (editar && id) await eventoService.atualizar(id, dados)
-      else await eventoService.criar(dados)
+      // Junta data + hora (24h) no formato ISO que a API espera
+      const payload = {
+        titulo: dados.titulo,
+        descricao: dados.descricao || null,
+        categoria_id: Number(dados.categoria_id),
+        data_inicio: `${dados.data_dia}T${dados.hini_h}:${dados.hini_m}`,
+        data_fim: (dados.hfim_h !== '' && dados.hfim_m !== '') ? `${dados.data_dia}T${dados.hfim_h}:${dados.hfim_m}` : null,
+        convidados: dados.convidados || null,
+        lembrete_minutos: Number(dados.lembrete_minutos),
+        recorrencia: dados.recorrencia,
+      }
+      if (editar && id) await eventoService.atualizar(id, payload)
+      else await eventoService.criar(payload)
       navigate('/')
     } catch (err) {
       setErro('Erro ao salvar evento.')
       console.error(err)
     } finally { setCarregando(false) }
+  }
+
+  // --- Seletor de presets de categoria (apenas ao criar) ---
+  const aplicarPreset = (preset) => {
+    setFormData({ nome: preset.nome, cor: preset.cor, icone: preset.icone })
   }
 
   const Section = ({ icon: Icon, title, children }) => (
@@ -85,14 +106,14 @@ function EventoForm({ editar = false }) {
             {editar ? 'Atualize os dados da sua rotina' : 'Adicione uma nova rotina'}
           </p>
         </div>
-        <button onClick={() => navigate('/')} className="btn-icon w-9 h-9 sm:w-10 sm:h-10">
+        <button onClick={() => navigate('/')} className="btn-icon w-9 h-9 sm:w-10 sm:h-10 shrink-0">
           <FiX className="w-5 h-5" />
         </button>
       </div>
 
       {erro && (
         <div className="mb-5 p-3 sm:p-4 rounded-xl text-[12px] sm:text-[13px] animate-fade-in"
-          style={{ background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.2)', color: '#fb7185' }}>
+          style={{ background: 'rgba(176,86,62,0.1)', border: '1.5px solid rgba(176,86,62,0.35)', color: '#b0563e' }}>
           {erro}
         </div>
       )}
@@ -106,7 +127,7 @@ function EventoForm({ editar = false }) {
                 <label className="label-field">Título *</label>
                 <input {...register('titulo', { required: 'Título é obrigatório' })}
                   className="input-field" placeholder="Ex: Aula de Matemática" />
-                {errors.titulo && <p className="text-[11px] sm:text-[12px] mt-1.5" style={{ color: '#fb7185' }}>{errors.titulo.message}</p>}
+                {errors.titulo && <p className="text-[11px] sm:text-[12px] mt-1.5" style={{ color: '#b0563e' }}>{errors.titulo.message}</p>}
               </div>
               <div>
                 <label className="label-field">Descrição</label>
@@ -119,54 +140,74 @@ function EventoForm({ editar = false }) {
                   className="input-field">
                   {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
                 </select>
-                {errors.categoria_id && <p className="text-[11px] sm:text-[12px] mt-1.5" style={{ color: '#fb7185' }}>{errors.categoria_id.message}</p>}
+                {(categoriaSel && categorias.find((c) => String(c.id) === String(categoriaSel))) && (
+                  <div className="cat-badge mt-2">
+                    <CategoriaIcone icone={categoriaSel.icone} cor={categoriaSel.cor} tamanho={13} />
+                    {categoriaSel.nome}
+                  </div>
+                )}
+                {errors.categoria_id && <p className="text-[11px] sm:text-[12px] mt-1.5" style={{ color: '#b0563e' }}>{errors.categoria_id.message}</p>}
               </div>
             </div>
           </Section>
         </div>
 
-        {/* Data e Hora */}
+        {/* Data e Hora — 24h, padrão Brasil, SEM AM/PM */}
         <div className="animate-fade-up delay-2">
           <Section icon={FiCalendar} title="Data e Hora">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <label className="label-field">Data Início *</label>
-                <input type="datetime-local" {...register('data_inicio', { required: 'Obrigatório' })}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div className="min-w-0">
+                <label className="label-field">Dia *</label>
+                <input type="date" {...register('data_dia', { required: 'Escolha o dia' })}
                   className="input-field" />
-                {errors.data_inicio && <p className="text-[11px] sm:text-[12px] mt-1.5" style={{ color: '#fb7185' }}>{errors.data_inicio.message}</p>}
+                {errors.data_dia && <p className="text-[11px] sm:text-[12px] mt-1.5" style={{ color: '#b0563e' }}>{errors.data_dia.message}</p>}
               </div>
-              <div>
-                <label className="label-field">Data Fim</label>
-                <input type="datetime-local" {...register('data_fim')} className="input-field" />
+              <div className="min-w-0">
+                <label className="label-field">Hora início *</label>
+                <div className="flex items-center gap-1.5">
+                  <select {...register('hini_h', { required: 'Hora?' })} className="input-field" aria-label="Hora de início">
+                    <option value="">--</option>
+                    {HORAS.map((h) => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                  <span className="font-bold shrink-0" style={{ color: 'var(--sage-dark)' }}>:</span>
+                  <select {...register('hini_m', { required: 'Min?' })} className="input-field" aria-label="Minuto de início">
+                    <option value="">--</option>
+                    {MINUTOS.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                {(errors.hini_h || errors.hini_m) && <p className="text-[11px] sm:text-[12px] mt-1.5" style={{ color: '#b0563e' }}>Informe hora e minuto</p>}
+              </div>
+              <div className="min-w-0">
+                <label className="label-field">Hora fim</label>
+                <div className="flex items-center gap-1.5">
+                  <select {...register('hfim_h')} className="input-field" aria-label="Hora de fim">
+                    <option value="">--</option>
+                    {HORAS.map((h) => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                  <span className="font-bold shrink-0" style={{ color: 'var(--sage-dark)' }}>:</span>
+                  <select {...register('hfim_m')} className="input-field" aria-label="Minuto de fim">
+                    <option value="">--</option>
+                    {MINUTOS.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
               </div>
             </div>
           </Section>
         </div>
 
-        {/* Lembretes */}
+        {/* Lembrete */}
         <div className="animate-fade-up delay-3">
-          <Section icon={FiBell} title="Lembretes e Alertas">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <label className="label-field">Lembrete (minutos antes)</label>
-                <select {...register('lembrete_minutos')} className="input-field">
-                  <option value="0">Sem lembrete</option>
-                  <option value="5">5 minutos</option>
-                  <option value="10">10 minutos</option>
-                  <option value="30">30 minutos</option>
-                  <option value="60">1 hora</option>
-                  <option value="1440">1 dia</option>
-                </select>
-              </div>
-              <div>
-                <label className="label-field">Recorrência</label>
-                <select {...register('recorrencia')} className="input-field">
-                  <option value="unico">Único</option>
-                  <option value="diario">Diário</option>
-                  <option value="semanal">Semanal</option>
-                  <option value="mensal">Mensal</option>
-                </select>
-              </div>
+          <Section icon={FiBell} title="Lembrete">
+            <div>
+              <label className="label-field">Lembrete</label>
+              <select {...register('lembrete_minutos')} className="input-field">
+                <option value="0">Sem lembrete</option>
+                <option value="5">5 minutos</option>
+                <option value="10">10 minutos</option>
+                <option value="30">30 minutos</option>
+                <option value="60">1 hora</option>
+                <option value="1440">1 dia</option>
+              </select>
             </div>
           </Section>
         </div>
